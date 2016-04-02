@@ -1395,6 +1395,7 @@ repack_one_table(repack_table *table, const char *orderby)
 	/*
 	 * 6. Invalidate all tables.
 	 */	
+	pgut_command(conn2, "BEGIN", 0, NULL);
 	params[0] = DIRTY_CHANNEL;
 	params[1] = SERIALIZED_ALL_TABLES;
 	pgut_command(conn2, "SELECT pg_notify($1, $2)", 2, params);
