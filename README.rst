@@ -7,6 +7,12 @@ pg_repack -- Reorganize tables in PostgreSQL databases with minimal locks
 - Bug Report: https://github.com/reorg/pg_repack/issues
 - Mailing List: http://pgfoundry.org/mailman/listinfo/reorg-general
 
+|travis|
+
+.. |travis| image:: https://travis-ci.org/reorg/pg_repack.svg?branch=master
+    :target: https://travis-ci.org/reorg/pg_repack
+    :alt: Linux and OSX build status
+
 pg_repack_ is a PostgreSQL extension which lets you remove bloat from
 tables and indexes, and optionally restore the physical order of clustered
 indexes. Unlike CLUSTER_ and `VACUUM FULL`_ it works online, without
@@ -16,10 +22,6 @@ CLUSTER directly.
 
 Please check the documentation (in the ``doc`` directory or online_) for
 installation and usage instructions.
-
-All users of pg_reorg 1.1.9 or earlier, and pg_repack 1.2.0-beta1 or earlier,
-are **urged to upgrade** to the latest pg_repack version to fix a serious
-data corruption issue_.
 
 .. _pg_repack: http://reorg.github.com/pg_repack
 .. _CLUSTER: http://www.postgresql.org/docs/current/static/sql-cluster.html
