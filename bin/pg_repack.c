@@ -160,6 +160,12 @@ const char *PROGRAM_VERSION = "unknown";
 /* Will be used as a unique prefix for advisory locks. */
 #define REPACK_LOCK_PREFIX_STR "16185446"
 
+/* dirty notification channel */
+#define DIRTY_CHANNEL "dirty"
+
+/* serialized notification for token 0, payload specifying all tables ("*", null) */
+#define SERIALIZED_ALL_TABLES "eJyLVjJQ0qlW0lKyio6tjQUAGIEDsQ=="
+
 typedef enum
 {
 	UNPROCESSED,
@@ -1496,7 +1502,16 @@ repack_one_table(repack_table *table, const char *orderby)
 	pgut_command(conn2, "COMMIT", 0, NULL);
 
 	/*
-	 * 6. Drop.
+	 * 6. Invalidate all tables.
+	 */	
+	pgut_command(conn2, "BEGIN", 0, NULL);
+	params[0] = DIRTY_CHANNEL;
+	params[1] = SERIALIZED_ALL_TABLES;
+	pgut_command(conn2, "SELECT pg_notify($1, $2)", 2, params);
+	pgut_command(conn2, "COMMIT", 0, NULL);
+	
+	/*
+	 * 7. Drop.
 	 */
 	elog(DEBUG2, "---- drop ----");
 
@@ -1509,13 +1524,14 @@ repack_one_table(repack_table *table, const char *orderby)
 		goto cleanup;
 	}
 
+	params[0] = utoa(table->target_oid, buffer);
 	params[1] = utoa(temp_obj_num, indexbuffer);
 	command("SELECT repack.repack_drop($1, $2)", 2, params);
 	command("COMMIT", 0, NULL);
 	temp_obj_num = 0; /* reset temporary object counter after cleanup */
 
 	/*
-	 * 7. Analyze.
+	 * 8. Analyze.
 	 * Note that cleanup hook has been already uninstalled here because analyze
 	 * is not an important operation; No clean up even if failed.
 	 */
